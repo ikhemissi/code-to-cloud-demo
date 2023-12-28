@@ -4,7 +4,7 @@ version: 1.0.0
 summary: TodoApp Environment
 description: Deploys a web app and an api connected to Cosmos and Azure OpenAI
 runner: ARM
-templatePath: main.bicep
+templatePath: azuredeploy.json
 
 parameters:
   - id: name
