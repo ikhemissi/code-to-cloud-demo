@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=https://github.com/Azure/deployment-environments/releases/download/2022-11-11-preview/manifest.schema.json
+name: TodoApp
+version: 1.0.0
+summary: TodoApp Environment
+description: Deploys a web app and an api connected to Cosmos and Azure OpenAI
+runner: ARM
+templatePath: main.bicep
+
+parameters:
+  - id: environmentName
+    name: Environment name
+    description: 'Name of the environment'
+    type: string
+
+    
