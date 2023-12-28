@@ -7,9 +7,14 @@ runner: ARM
 templatePath: main.bicep
 
 parameters:
-  - id: environmentName
+  - id: name
     name: Environment name
-    description: 'Name of the environment'
+    description: "Name of the environment"
+    type: string
+  - id: location
+    name: location
+    description: "Location to deploy the environment resources"
+    default: "[resourceGroup().location]"
     type: string
 
     
