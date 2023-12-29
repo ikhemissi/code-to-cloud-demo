@@ -5,7 +5,7 @@ param name string = ''
 @description('Location to deploy the environment resources')
 param location string = resourceGroup().location
 
-param apiServiceName string = ''
+param webAppServiceName string = ''
 param applicationInsightsDashboardName string = ''
 param applicationInsightsName string = ''
 param appServicePlanName string = ''
@@ -13,7 +13,6 @@ param cosmosAccountName string = ''
 param cosmosDatabaseName string = ''
 param keyVaultName string = ''
 param logAnalyticsName string = ''
-param webServiceName string = ''
 param aoaiAccountName string = ''
 
 @description('Id of the user or app to assign application roles')
@@ -24,45 +23,20 @@ var abbrs = loadJsonContent('./abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
 var tags = { 'azd-env-name': environmentName }
 
-// The application frontend
-module web './app/web.bicep' = {
-  name: 'web'
+// The webapp
+module webapp './app/webapp.bicep' = {
+  name: 'webapp'
   params: {
-    name: !empty(webServiceName) ? webServiceName : '${abbrs.webSitesAppService}web-${resourceToken}'
-    location: location
-    tags: tags
-    applicationInsightsName: monitoring.outputs.applicationInsightsName
-    appServicePlanId: appServicePlan.outputs.id
-  }
-}
-
-module webAppSettings './core/host/appservice-appsettings.bicep' = {
-  name: 'web-appsettings'
-  params: {
-    name: web.outputs.SERVICE_WEB_NAME
-    appSettings: {
-      REACT_APP_API_BASE_URL: api.outputs.SERVICE_API_URI
-      REACT_APP_APPLICATIONINSIGHTS_CONNECTION_STRING: monitoring.outputs.applicationInsightsConnectionString
-    }
-  }
-}
-
-// The application backend
-module api './app/api.bicep' = {
-  name: 'api'
-  params: {
-    name: !empty(apiServiceName) ? apiServiceName : '${abbrs.webSitesAppService}api-${resourceToken}'
+    name: !empty(webAppServiceName) ? webAppServiceName : '${abbrs.webSitesAppService}webapp-${resourceToken}'
     location: location
     tags: tags
     applicationInsightsName: monitoring.outputs.applicationInsightsName
     appServicePlanId: appServicePlan.outputs.id
     keyVaultName: keyVault.outputs.name
-    allowedOrigins: [ web.outputs.SERVICE_WEB_URI ]
     appSettings: {
       AZURE_COSMOS_CONNECTION_STRING_KEY: cosmos.outputs.connectionStringKey
       AZURE_COSMOS_DATABASE_NAME: cosmos.outputs.databaseName
       AZURE_COSMOS_ENDPOINT: cosmos.outputs.endpoint
-      API_ALLOW_ORIGINS: web.outputs.SERVICE_WEB_URI
     }
   }
 }
@@ -72,7 +46,7 @@ module apiKeyVaultAccess './core/security/keyvault-access.bicep' = {
   name: 'api-keyvault-access'
   params: {
     keyVaultName: keyVault.outputs.name
-    principalId: api.outputs.SERVICE_API_IDENTITY_PRINCIPAL_ID
+    principalId: webapp.outputs.SERVICE_WEBAPP_IDENTITY_PRINCIPAL_ID
   }
 }
 
@@ -144,6 +118,5 @@ output AZURE_KEY_VAULT_ENDPOINT string = keyVault.outputs.endpoint
 output AZURE_KEY_VAULT_NAME string = keyVault.outputs.name
 output AZURE_LOCATION string = location
 output AZURE_TENANT_ID string = tenant().tenantId
-output REACT_APP_API_BASE_URL string = api.outputs.SERVICE_API_URI
+output REACT_APP_WEB_BASE_URL string = webapp.outputs.SERVICE_WEBAPP_URI
 output REACT_APP_APPLICATIONINSIGHTS_CONNECTION_STRING string = monitoring.outputs.applicationInsightsConnectionString
-output REACT_APP_WEB_BASE_URL string = web.outputs.SERVICE_WEB_URI
