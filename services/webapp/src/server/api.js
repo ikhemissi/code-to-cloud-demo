@@ -1,5 +1,6 @@
-const { randomUUID } = require('crypto');
-const { Router } = require('express');
+import { randomUUID } from 'crypto';
+import { Router } from 'express';
+
 const router = Router();
 
 // Types
@@ -36,7 +37,7 @@ router.post('/todos', (req, res) => {
   /** @type {Todo} */
   const todo = req.body;
   todo.id = randomUUID();
-  todos.push(todo);
+  todos.unshift(todo); // Add to the beginning of the array
   res.send(todo);
 });
 
@@ -52,7 +53,7 @@ router.patch('/todos/:id', (req, res) => {
     return;
   }
 
-  Object.assign(todo, todoUpdates);
+  Object.assign(todo, todoUpdates);  // Update the todo task
 
   res.send(todo);
 });
@@ -65,7 +66,7 @@ router.post('/categories', (req, res) => {
   /** @type {Category} */
   const category = req.body;
   category.id = randomUUID();
-  categories.push(category);
+  categories.unshift(category); // Add to the beginning of the array
   res.send(category);
 });
 
@@ -81,9 +82,9 @@ router.patch('/categories/:id', (req, res) => {
     return;
   }
 
-  Object.assign(category, categoryUpdates);
+  Object.assign(category, categoryUpdates); // Update the category
 
   res.send(category);
 });
 
-module.exports = router;
+export default router;

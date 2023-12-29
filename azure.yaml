@@ -2,12 +2,7 @@
 
 name: code-to-cloud-demo
 services:
-  web:
-    project: ./src/web
-    dist: build
-    language: js
-    host: appservice
-  api:
-    project: ./src/api
+  webapp:
+    project: ./services/webapp
     language: js
     host: appservice
