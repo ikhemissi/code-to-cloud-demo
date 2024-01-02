@@ -37,13 +37,16 @@ module webapp './app/webapp.bicep' = {
       AZURE_COSMOS_CONNECTION_STRING: '@Microsoft.KeyVault(SecretUri=${cosmos.outputs.connectionStringSecret})'
       AZURE_COSMOS_DATABASE_NAME: cosmos.outputs.databaseName
       AZURE_COSMOS_ENDPOINT: cosmos.outputs.endpoint
+      AZURE_OPENAI_KEY: '@Microsoft.KeyVault(SecretUri=${aoai.outputs.apiKeySecret})'
+      AZURE_OPENAI_ENDPOINT: aoai.outputs.endpoint
+      AZURE_OPENAI_DEPLOYMENT_ID: aoai.outputs.deploymentId
     }
   }
 }
 
 // Give the webapp access to KeyVault
-module apiKeyVaultAccess './core/security/keyvault-access.bicep' = {
-  name: 'api-keyvault-access'
+module webappKeyVaultAccess './core/security/keyvault-access.bicep' = {
+  name: 'webapp-keyvault-access'
   params: {
     keyVaultName: keyVault.outputs.name
     principalId: webapp.outputs.SERVICE_WEBAPP_IDENTITY_PRINCIPAL_ID
@@ -69,6 +72,7 @@ module aoai './app/aoai.bicep' = {
     accountName: !empty(aoaiAccountName) ? aoaiAccountName : '${abbrs.cognitiveServicesAccounts}openai-${resourceToken}'
     location: location
     tags: tags
+    keyVaultName: keyVault.outputs.name
   }
 }
 

@@ -6,6 +6,8 @@ param tags object = {}
 param customSubDomainName string = name
 param deployments array = []
 param kind string = 'OpenAI'
+param keyVaultName string
+param ApiKeyKeyname string = 'AZURE-OPENAI-KEY'
 
 @allowed([ 'Enabled', 'Disabled' ])
 param publicNetworkAccess string = 'Enabled'
@@ -48,6 +50,21 @@ resource deployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01
   }
 }]
 
+
+resource aoaiApiKey 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  parent: keyVault
+  name: ApiKeyKeyname
+  properties: {
+    value: account.listKeys().key1
+  }
+}
+
+resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
+  name: keyVaultName
+}
+
 output endpoint string = account.properties.endpoint
 output id string = account.id
 output name string = account.name
+output apiKeySecret string = aoaiApiKey.properties.secretUri
+

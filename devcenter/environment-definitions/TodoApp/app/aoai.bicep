@@ -2,6 +2,7 @@ param accountName string
 param location string = resourceGroup().location
 param tags object = {}
 
+param keyVaultName string
 @description('OpenAI deployments to create.')
 param deployments array = [
   {
@@ -27,7 +28,10 @@ module aoai '../core/ai/cognitiveservices.bicep' = {
     tags: tags
     kind: 'OpenAI'
     deployments: deployments
+    keyVaultName: keyVaultName
   }
 }
 
 output endpoint string = aoai.outputs.endpoint
+output apiKeySecret string = aoai.outputs.apiKeySecret
+output deploymentId string = deployments[0].name
