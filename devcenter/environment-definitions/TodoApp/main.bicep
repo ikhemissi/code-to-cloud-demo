@@ -34,14 +34,14 @@ module webapp './app/webapp.bicep' = {
     appServicePlanId: appServicePlan.outputs.id
     keyVaultName: keyVault.outputs.name
     appSettings: {
-      AZURE_COSMOS_CONNECTION_STRING_KEY: cosmos.outputs.connectionStringKey
+      AZURE_COSMOS_CONNECTION_STRING: '@Microsoft.KeyVault(SecretUri=${cosmos.outputs.connectionStringSecret})'
       AZURE_COSMOS_DATABASE_NAME: cosmos.outputs.databaseName
       AZURE_COSMOS_ENDPOINT: cosmos.outputs.endpoint
     }
   }
 }
 
-// Give the API access to KeyVault
+// Give the webapp access to KeyVault
 module apiKeyVaultAccess './core/security/keyvault-access.bicep' = {
   name: 'api-keyvault-access'
   params: {
@@ -109,7 +109,7 @@ module monitoring './core/monitor/monitoring.bicep' = {
 }
 
 // Data outputs
-output AZURE_COSMOS_CONNECTION_STRING_KEY string = cosmos.outputs.connectionStringKey
+output AZURE_COSMOS_CONNECTION_STRING_SECRET string = cosmos.outputs.connectionStringSecret
 output AZURE_COSMOS_DATABASE_NAME string = cosmos.outputs.databaseName
 
 // App outputs

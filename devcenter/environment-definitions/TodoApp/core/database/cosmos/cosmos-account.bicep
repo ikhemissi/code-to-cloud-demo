@@ -43,7 +43,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
   name: keyVaultName
 }
 
-output connectionStringKey string = connectionStringKey
+output connectionStringSecret string = cosmosConnectionString.properties.secretUri
 output endpoint string = cosmos.properties.documentEndpoint
 output id string = cosmos.id
 output name string = cosmos.name
