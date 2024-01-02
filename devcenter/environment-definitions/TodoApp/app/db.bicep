@@ -33,7 +33,7 @@ module cosmos '../core/database/cosmos/sql/cosmos-sql-db.bicep' = {
   }
 }
 
-output connectionStringKey string = cosmos.outputs.connectionStringKey
+output connectionStringSecret string = cosmos.outputs.connectionStringSecret
 output databaseName string = cosmos.outputs.databaseName
 output endpoint string = cosmos.outputs.endpoint
 output accountId string = cosmos.outputs.accountId

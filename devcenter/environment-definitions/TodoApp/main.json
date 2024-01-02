@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.24.24.22086",
-      "templateHash": "4136225465414220561"
+      "templateHash": "17457473522591931573"
     }
   },
   "parameters": {
@@ -241,9 +241,12 @@
           },
           "appSettings": {
             "value": {
-              "AZURE_COSMOS_CONNECTION_STRING_KEY": "[reference(resourceId('Microsoft.Resources/deployments', 'cosmos'), '2022-09-01').outputs.connectionStringKey.value]",
+              "AZURE_COSMOS_CONNECTION_STRING": "[format('@Microsoft.KeyVault(SecretUri={0})', reference(resourceId('Microsoft.Resources/deployments', 'cosmos'), '2022-09-01').outputs.connectionStringSecret.value)]",
               "AZURE_COSMOS_DATABASE_NAME": "[reference(resourceId('Microsoft.Resources/deployments', 'cosmos'), '2022-09-01').outputs.databaseName.value]",
-              "AZURE_COSMOS_ENDPOINT": "[reference(resourceId('Microsoft.Resources/deployments', 'cosmos'), '2022-09-01').outputs.endpoint.value]"
+              "AZURE_COSMOS_ENDPOINT": "[reference(resourceId('Microsoft.Resources/deployments', 'cosmos'), '2022-09-01').outputs.endpoint.value]",
+              "AZURE_OPENAI_KEY": "[format('@Microsoft.KeyVault(SecretUri={0})', reference(resourceId('Microsoft.Resources/deployments', 'openai'), '2022-09-01').outputs.apiKeySecret.value)]",
+              "AZURE_OPENAI_ENDPOINT": "[reference(resourceId('Microsoft.Resources/deployments', 'openai'), '2022-09-01').outputs.endpoint.value]",
+              "AZURE_OPENAI_DEPLOYMENT_ID": "[reference(resourceId('Microsoft.Resources/deployments', 'openai'), '2022-09-01').outputs.deploymentId.value]"
             }
           }
         },
@@ -631,6 +634,7 @@
         }
       },
       "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'openai')]",
         "[resourceId('Microsoft.Resources/deployments', 'appserviceplan')]",
         "[resourceId('Microsoft.Resources/deployments', 'cosmos')]",
         "[resourceId('Microsoft.Resources/deployments', 'keyvault')]",
@@ -640,7 +644,7 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
-      "name": "api-keyvault-access",
+      "name": "webapp-keyvault-access",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -740,7 +744,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.24.24.22086",
-              "templateHash": "14574330821828795549"
+              "templateHash": "6820659844137098316"
             }
           },
           "parameters": {
@@ -819,7 +823,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.24.24.22086",
-                      "templateHash": "337912376960167237"
+                      "templateHash": "14183643924280397758"
                     },
                     "description": "Creates an Azure Cosmos DB for NoSQL account with a database."
                   },
@@ -917,7 +921,7 @@
                             "_generator": {
                               "name": "bicep",
                               "version": "0.24.24.22086",
-                              "templateHash": "18186915422344104928"
+                              "templateHash": "10183523503490757160"
                             },
                             "description": "Creates an Azure Cosmos DB for NoSQL account."
                           },
@@ -971,7 +975,7 @@
                                     "_generator": {
                                       "name": "bicep",
                                       "version": "0.24.24.22086",
-                                      "templateHash": "4303797640591333229"
+                                      "templateHash": "14394798958711587156"
                                     },
                                     "description": "Creates an Azure Cosmos DB account."
                                   },
@@ -1046,9 +1050,9 @@
                                     }
                                   ],
                                   "outputs": {
-                                    "connectionStringKey": {
+                                    "connectionStringSecret": {
                                       "type": "string",
-                                      "value": "[parameters('connectionStringKey')]"
+                                      "value": "[reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('keyVaultName'), parameters('connectionStringKey')), '2022-07-01').secretUri]"
                                     },
                                     "endpoint": {
                                       "type": "string",
@@ -1068,9 +1072,9 @@
                             }
                           ],
                           "outputs": {
-                            "connectionStringKey": {
+                            "connectionStringSecret": {
                               "type": "string",
-                              "value": "[reference(resourceId('Microsoft.Resources/deployments', 'cosmos-account'), '2022-09-01').outputs.connectionStringKey.value]"
+                              "value": "[reference(resourceId('Microsoft.Resources/deployments', 'cosmos-account'), '2022-09-01').outputs.connectionStringSecret.value]"
                             },
                             "endpoint": {
                               "type": "string",
@@ -1235,9 +1239,9 @@
                       "type": "string",
                       "value": "[reference(resourceId('Microsoft.Resources/deployments', 'cosmos-sql-account'), '2022-09-01').outputs.name.value]"
                     },
-                    "connectionStringKey": {
+                    "connectionStringSecret": {
                       "type": "string",
-                      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'cosmos-sql-account'), '2022-09-01').outputs.connectionStringKey.value]"
+                      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'cosmos-sql-account'), '2022-09-01').outputs.connectionStringSecret.value]"
                     },
                     "databaseName": {
                       "type": "string",
@@ -1257,9 +1261,9 @@
             }
           ],
           "outputs": {
-            "connectionStringKey": {
+            "connectionStringSecret": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Resources/deployments', 'cosmos-sql-db'), '2022-09-01').outputs.connectionStringKey.value]"
+              "value": "[reference(resourceId('Microsoft.Resources/deployments', 'cosmos-sql-db'), '2022-09-01').outputs.connectionStringSecret.value]"
             },
             "databaseName": {
               "type": "string",
@@ -1296,6 +1300,9 @@
           },
           "tags": {
             "value": "[variables('tags')]"
+          },
+          "keyVaultName": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'keyvault'), '2022-09-01').outputs.name.value]"
           }
         },
         "template": {
@@ -1305,7 +1312,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.24.24.22086",
-              "templateHash": "16176711359899603329"
+              "templateHash": "7254266119830364195"
             }
           },
           "parameters": {
@@ -1319,6 +1326,9 @@
             "tags": {
               "type": "object",
               "defaultValue": {}
+            },
+            "keyVaultName": {
+              "type": "string"
             },
             "deployments": {
               "type": "array",
@@ -1367,6 +1377,9 @@
                   },
                   "deployments": {
                     "value": "[parameters('deployments')]"
+                  },
+                  "keyVaultName": {
+                    "value": "[parameters('keyVaultName')]"
                   }
                 },
                 "template": {
@@ -1376,7 +1389,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.24.24.22086",
-                      "templateHash": "6901335378357356756"
+                      "templateHash": "7245221347031750828"
                     },
                     "description": "Creates an Azure Cognitive Services instance."
                   },
@@ -1406,6 +1419,13 @@
                     "kind": {
                       "type": "string",
                       "defaultValue": "OpenAI"
+                    },
+                    "keyVaultName": {
+                      "type": "string"
+                    },
+                    "ApiKeyKeyname": {
+                      "type": "string",
+                      "defaultValue": "AZURE-OPENAI-KEY"
                     },
                     "publicNetworkAccess": {
                       "type": "string",
@@ -1463,6 +1483,17 @@
                       "dependsOn": [
                         "[resourceId('Microsoft.CognitiveServices/accounts', parameters('name'))]"
                       ]
+                    },
+                    {
+                      "type": "Microsoft.KeyVault/vaults/secrets",
+                      "apiVersion": "2022-07-01",
+                      "name": "[format('{0}/{1}', parameters('keyVaultName'), parameters('ApiKeyKeyname'))]",
+                      "properties": {
+                        "value": "[listKeys(resourceId('Microsoft.CognitiveServices/accounts', parameters('name')), '2023-05-01').key1]"
+                      },
+                      "dependsOn": [
+                        "[resourceId('Microsoft.CognitiveServices/accounts', parameters('name'))]"
+                      ]
                     }
                   ],
                   "outputs": {
@@ -1477,6 +1508,10 @@
                     "name": {
                       "type": "string",
                       "value": "[parameters('name')]"
+                    },
+                    "apiKeySecret": {
+                      "type": "string",
+                      "value": "[reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('keyVaultName'), parameters('ApiKeyKeyname')), '2022-07-01').secretUri]"
                     }
                   }
                 }
@@ -1487,10 +1522,21 @@
             "endpoint": {
               "type": "string",
               "value": "[reference(resourceId('Microsoft.Resources/deployments', 'aoai'), '2022-09-01').outputs.endpoint.value]"
+            },
+            "apiKeySecret": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Resources/deployments', 'aoai'), '2022-09-01').outputs.apiKeySecret.value]"
+            },
+            "deploymentId": {
+              "type": "string",
+              "value": "[parameters('deployments')[0].name]"
             }
           }
         }
-      }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'keyvault')]"
+      ]
     },
     {
       "type": "Microsoft.Resources/deployments",
@@ -3165,9 +3211,9 @@
     }
   ],
   "outputs": {
-    "AZURE_COSMOS_CONNECTION_STRING_KEY": {
+    "AZURE_COSMOS_CONNECTION_STRING_SECRET": {
       "type": "string",
-      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'cosmos'), '2022-09-01').outputs.connectionStringKey.value]"
+      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'cosmos'), '2022-09-01').outputs.connectionStringSecret.value]"
     },
     "AZURE_COSMOS_DATABASE_NAME": {
       "type": "string",
